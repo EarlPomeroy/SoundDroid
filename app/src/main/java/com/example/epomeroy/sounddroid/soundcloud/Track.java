@@ -1,4 +1,4 @@
-package com.example.epomeroy.sounddroid;
+package com.example.epomeroy.sounddroid.soundcloud;
 
 import com.google.gson.annotations.SerializedName;
 

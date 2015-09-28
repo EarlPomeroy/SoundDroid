@@ -4,13 +4,19 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.epomeroy.sounddroid.soundcloud.SoundCloud;
 import com.example.epomeroy.sounddroid.soundcloud.SoundCloudService;
 import com.example.epomeroy.sounddroid.soundcloud.Track;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,15 +36,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar view = (Toolbar) findViewById(R.id.player_toolbar);
+        final TextView selectedView = (TextView) findViewById(R.id.selected_title);
+        final ImageView selectedImage = (ImageView) findViewById(R.id.selected_thumbnail);
+
         RecyclerView rv = (RecyclerView) findViewById(R.id.songs_list);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
         tracksList = new ArrayList<>();
-        tracksAdapter = new TracksAdapter(tracksList);
+        tracksAdapter = new TracksAdapter(this, tracksList);
+        tracksAdapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Track track = tracksList.get(position);
+                selectedView.setText(track.getTitle());
+                Picasso.with(MainActivity.this).load(track.getAvatarURL()).into(selectedImage);
+            }
+        });
+
         rv.setAdapter(tracksAdapter);
 
         SoundCloudService service = SoundCloud.getService();
-
         service.searchSongs("dark horse", new Callback<List<Track>>() {
             @Override
             public void success(List<Track> tracks, Response response) {

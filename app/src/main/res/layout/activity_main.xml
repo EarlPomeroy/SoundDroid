@@ -28,5 +28,10 @@
             android:paddingLeft="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/player_states"
+            android:layout_gravity="right"
+            android:layout_width="@dimen/avatar_size"
+            android:layout_height="@dimen/avatar_size" />
     </android.support.v7.widget.Toolbar>
 </LinearLayout>

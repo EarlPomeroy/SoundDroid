@@ -1,5 +1,7 @@
 package com.example.epomeroy.sounddroid;
 
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +20,7 @@ import com.example.epomeroy.sounddroid.soundcloud.SoundCloudService;
 import com.example.epomeroy.sounddroid.soundcloud.Track;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,13 +31,22 @@ import retrofit.client.Response;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
-    private TracksAdapter tracksAdapter;
     private List<Track> tracksList;
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.start();
+            }
+        });
 
         Toolbar view = (Toolbar) findViewById(R.id.player_toolbar);
         final TextView selectedView = (TextView) findViewById(R.id.selected_title);
@@ -44,13 +56,20 @@ public class MainActivity extends AppCompatActivity {
         rv.setLayoutManager(new LinearLayoutManager(this));
 
         tracksList = new ArrayList<>();
-        tracksAdapter = new TracksAdapter(this, tracksList);
+        final TracksAdapter tracksAdapter = new TracksAdapter(this, tracksList);
         tracksAdapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Track track = tracksList.get(position);
                 selectedView.setText(track.getTitle());
                 Picasso.with(MainActivity.this).load(track.getAvatarURL()).into(selectedImage);
+
+                try {
+                    mediaPlayer.setDataSource(track.getStreamUrl() + "?client_id=" + SoundCloudService.CLIENT_ID);
+                    mediaPlayer.prepareAsync();
+                } catch (IOException e) {
+                    Log.d(TAG, e.getMessage());
+                }
             }
         });
 
